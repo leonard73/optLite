@@ -84,3 +84,72 @@ void do_gray8_histogram_optV4(uint8_t * src,uint8_t * histogramTbl,uint32_t pixe
     }
     free(hist1);free(hist2);free(hist3);free(hist4);
 }
+void do_threshold_u8_optV1(uint8_t * src,uint8_t * dst,uint32_t pixelNB,uint8_t threshold)
+{
+    for(uint32_t pixel=0;pixel<pixelNB;pixel++)
+    {
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+    }
+}
+void do_threshold_u8_optV2(uint8_t * src,uint8_t * dst,uint32_t pixelNB,uint8_t threshold)
+{
+    for(uint32_t pixel=0;pixel<(pixelNB>>2);pixel++)
+    {
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+    }
+}
+#ifdef _USE_NEON_ISA_
+void do_threshold_u8_optV3(uint8_t * src,uint8_t * dst,uint32_t pixelNB,uint8_t threshold)
+{
+    uint8x16_t vThreshold = {   threshold,threshold,threshold,threshold,threshold,threshold,threshold,threshold,
+                                threshold,threshold,threshold,threshold,threshold,threshold,threshold,threshold };
+    for(uint32_t pixel=0;pixel<pixelNB;pixel+=16)
+    {
+        uint8x16_t vLoad_src = vld1q_u8(src+pixel);
+        uint8x16_t vStore_dst= vcgtq_u8(vLoad_src,vThreshold);
+        vst1q_u8(dst+pixel,vStore_dst);
+    }
+}
+void do_threshold_u8_optV4(uint8_t * src,uint8_t * dst,uint32_t pixelNB,uint8_t threshold)
+{
+    uint8x16_t vThreshold = {   threshold,threshold,threshold,threshold,threshold,threshold,threshold,threshold,
+                                threshold,threshold,threshold,threshold,threshold,threshold,threshold,threshold };
+    for(uint32_t pixel=0;pixel<pixelNB;pixel+=32)
+    {
+        uint8x16_t vLoad_src1 = vld1q_u8(src+pixel);
+        uint8x16_t vStore_dst1= vcgtq_u8(vLoad_src1,vThreshold);
+        vst1q_u8(dst+pixel,vStore_dst1);
+        uint8x16_t vLoad_src2 = vld1q_u8(src+pixel+16);
+        uint8x16_t vStore_dst2= vcgtq_u8(vLoad_src2,vThreshold);
+        vst1q_u8(dst+pixel+16,vStore_dst2);
+    }
+}
+#endif
+#ifdef _USE_AVX256_ISA_
+void do_threshold_u8_optV3(uint8_t * src,uint8_t * dst,uint32_t pixelNB,uint8_t threshold)
+{
+    for(uint32_t pixel=0;pixel<pixelNB;pixel++)
+    {
+        __m256i vLoad_src  = _mm256_load_si256(src+pixel);
+        __m256i vStore_dst = 
+         _mm256_store_si256 (dst+pixel, __m256i a)
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+    }
+}
+void do_threshold_u8_optV4(uint8_t * src,uint8_t * dst,uint32_t pixelNB,uint8_t threshold)
+{
+    for(uint32_t pixel=0;pixel<(pixelNB>>2);pixel++)
+    {
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+        *dst++  = ((*src++) < threshold )? 0 : 255;
+    }
+}
+#endif

@@ -45,11 +45,10 @@ uint8_t do_bestThresholdByHistIteration_u8(uint8_t const * histogramTbl,uint32_t
     }
     return newThreshold;
 }
-void do_threshold_u8(uint8_t const * src,uint8_t * dst,uint32_t pixelNB,uint8_t threshold)
+void do_threshold_u8(uint8_t * src,uint8_t * dst,uint32_t pixelNB,uint8_t threshold)
 {
     for(uint32_t pixel=0;pixel<pixelNB;pixel++)
     {
-        uint8_t pixel_value = src[pixel];
         if(src[pixel] < threshold)
         {
             dst[pixel] = 0;

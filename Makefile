@@ -64,12 +64,12 @@ run_amd64_demo:
 	./output/$(out_amd64)
 run_arm64_demo:
 	adb shell rm -rf /data/local/tmp/*
-	adb push output/$(out_arm64_android) 					/data/local/tmp/
-	adb push data/$(BMP_INPUT_NAME)									/data/local/tmp/
+	adb push output/$(out_arm64_android) 																      /data/local/tmp/
+	adb push data/$(BMP_INPUT_NAME)																			  /data/local/tmp/
 	adb shell chmod +x /data/local/tmp/$(out_arm64_android)
 	adb push $(NDK_ROOT)/toolchains/llvm/prebuilt/linux-x86_64/lib64/clang/11.0.5/lib/linux/aarch64/libomp.so /data/local/tmp/
 	echo "export LD_LIBRARY_PATH=/data/local/tmp/ \n /data/local/tmp/$(out_arm64_android)" > cmd.txt
 	echo '##############run_arm64_demo##############'
 	adb shell <  cmd.txt
 	rm -rf cmd.txt
-	adb pull data/local/tmp									output/
+	adb pull data/local/tmp																					  output/

@@ -41,17 +41,16 @@ int main()
         threshold=do_bestThresholdByHistIteration_u8(histogram_tbl,100);
         record_ts_end();
         printf("do_bestThresholdByHistIteration_u8 runs: %ld US\n",getLatencyUs());
-        printf("best threshold=%d\n",threshold);
+        // printf("best threshold=%d\n",threshold);
     }
     //step4 do threshold operation on img
     {
         record_ts_start();
         uint8_t * grayU8_opIn  = output;
         uint8_t * grayU8_opOut = output+img_width*img_height;
-        do_threshold_u8(grayU8_opIn,grayU8_opOut,img_width*img_height,threshold);
+        do_threshold_u8_optV4(grayU8_opIn,grayU8_opOut,img_width*img_height,threshold);
         record_ts_end();
         printf("do_threshold_u8 runs: %ld US\n",getLatencyUs());
         save_RawGray8_bmpFile((char*)_PIC1_RESULT_BMP_PATH_THRESHOLD,grayU8_opOut,img_width*img_height,img_width,img_height);
     }
-    printf("hello world demo_main\n");
 }
