@@ -117,39 +117,51 @@ void do_threshold_u8_optV4(uint8_t * src,uint8_t * dst,uint32_t pixelNB,uint8_t 
 {
     uint8x16_t vThreshold = {   threshold,threshold,threshold,threshold,threshold,threshold,threshold,threshold,
                                 threshold,threshold,threshold,threshold,threshold,threshold,threshold,threshold };
-    for(uint32_t pixel=0;pixel<pixelNB;pixel+=32)
+    const uint32_t half_pixelNB = pixelNB >> 1;
+    register uint8x16_t * vsrc1 = (uint8x16_t *)src;
+    register uint8x16_t * vsrc2 = (uint8x16_t *)(src + half_pixelNB);
+    register uint8x16_t * vdst1 = (uint8x16_t *)dst;
+    register uint8x16_t * vdst2 = (uint8x16_t *)(dst + half_pixelNB);
+    for(uint32_t pixel=0;pixel<half_pixelNB;pixel+=16)
     {
-        uint8x16_t vLoad_src1 = vld1q_u8(src+pixel);
+        uint8x16_t vLoad_src1 = vld1q_u8((void*)(vsrc1++));
+        uint8x16_t vLoad_src2 = vld1q_u8((void*)(vsrc2++));
         uint8x16_t vStore_dst1= vcgtq_u8(vLoad_src1,vThreshold);
-        vst1q_u8(dst+pixel,vStore_dst1);
-        uint8x16_t vLoad_src2 = vld1q_u8(src+pixel+16);
         uint8x16_t vStore_dst2= vcgtq_u8(vLoad_src2,vThreshold);
-        vst1q_u8(dst+pixel+16,vStore_dst2);
+        vst1q_u8((void*)(vdst1++),vStore_dst1);
+        vst1q_u8((void*)(vdst2++),vStore_dst2);
     }
 }
 #endif
 #ifdef _USE_AVX256_ISA_
 void do_threshold_u8_optV3(uint8_t * src,uint8_t * dst,uint32_t pixelNB,uint8_t threshold)
 {
-    for(uint32_t pixel=0;pixel<pixelNB;pixel++)
+    __m256i vSFlag      =  _mm256_set1_epi8 (0x80);
+    __m256i vThreshold  =  _mm256_set1_epi8 (((char)(threshold)) ^ 0x80);
+    for(uint32_t pixel=0;pixel<pixelNB;pixel+=32)
     {
-        __m256i vLoad_src  = _mm256_load_si256(src+pixel);
-        __m256i vStore_dst = 
-         _mm256_store_si256 (dst+pixel, __m256i a)
-        *dst++  = ((*src++) < threshold )? 0 : 255;
-        *dst++  = ((*src++) < threshold )? 0 : 255;
-        *dst++  = ((*src++) < threshold )? 0 : 255;
-        *dst++  = ((*src++) < threshold )? 0 : 255;
+        __m256i vLoad_src   =  _mm256_loadu_si256 (src+pixel);
+        __m256i vStore_dst  =  _mm256_cmpgt_epi8  (vLoad_src^vSFlag , vThreshold);
+        _mm256_storeu_si256 (dst+pixel, vStore_dst);
     }
 }
 void do_threshold_u8_optV4(uint8_t * src,uint8_t * dst,uint32_t pixelNB,uint8_t threshold)
 {
-    for(uint32_t pixel=0;pixel<(pixelNB>>2);pixel++)
+    __m256i vSFlag      =  _mm256_set1_epi8 (0x80);
+    __m256i vThreshold  =  _mm256_set1_epi8 (((char)(threshold)) ^ 0x80);
+    const uint32_t half_pixelNB = pixelNB >> 1;
+    register __m256i * vsrc1 = (__m256i *)src;
+    register __m256i * vsrc2 = (__m256i *)(src + half_pixelNB);
+    register __m256i * vdst1 = (__m256i *)dst;
+    register __m256i * vdst2 = (__m256i *)(dst + half_pixelNB);
+    for(uint32_t pixel=0;pixel<half_pixelNB;pixel+=32)
     {
-        *dst++  = ((*src++) < threshold )? 0 : 255;
-        *dst++  = ((*src++) < threshold )? 0 : 255;
-        *dst++  = ((*src++) < threshold )? 0 : 255;
-        *dst++  = ((*src++) < threshold )? 0 : 255;
+        __m256i vLoad_src1   =  _mm256_loadu_si256 ((void*)(vsrc1++));
+        __m256i vLoad_src2   =  _mm256_loadu_si256 ((void*)(vsrc2++));
+        __m256i vStore_dst1  =  _mm256_cmpgt_epi8  (vLoad_src1^vSFlag , vThreshold);
+        __m256i vStore_dst2  =  _mm256_cmpgt_epi8  (vLoad_src2^vSFlag , vThreshold);
+        _mm256_storeu_si256 ((void*)(vdst1++), vStore_dst1);
+        _mm256_storeu_si256 ((void*)(vdst2++), vStore_dst2);
     }
 }
 #endif
