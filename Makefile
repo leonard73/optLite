@@ -1,11 +1,13 @@
+##########################################     PJ      ####################################################
+# demo_name:=ThresholdSeg
+demo_name:=SmoothRGB
 ##########################################     CC      ####################################################
 amd64_cc:=gcc
 arm64_android_clang_cc:=$(NDK_ROOT)/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android30-clang
 ##########################################     INC     ####################################################
 SourceCode_INC:=codes/include
 ##########################################     DEMO    ####################################################
-# Demo_SRC:=demo/RetinexDemo.c
-Demo_SRC:=demo/ThresholdSeg.c
+Demo_SRC:=demo/$(demo_name).c
 ##########################################     SRC     ####################################################
 SourceCode_SRC:=codes/common/*.c
 SourceCode_SRC+=codes/algo_CRef/*.c
@@ -20,25 +22,29 @@ Amd64_DEF+= -D_USE_AVX128_ISA_ -mavx
 Amd64_DEF+= -D_USE_AVX256_ISA_ -mavx2
 Amd64_DEF+= -D_USE_AVX512_ISA_
 Amd64_DEF+= -D'_PIC1_BMP_PATH_3072x2048x3_="data/$(BMP_INPUT_NAME)"'
-Amd64_DEF+= -D'_PIC1_RESULT_BMP_PATH_BGR2GRAY="output/pic1_thresholdSeg_amd64_rgb2gray.bmp"'
-Amd64_DEF+= -D'_PIC1_RESULT_BMP_PATH_THRESHOLD="output/pic1_thresholdSeg_amd64_result.bmp"'
+Amd64_DEF+= -D'_PIC1_RESULT_BMP_PATH_BGR2GRAY="output/pic1_$(demo_name)_amd64_rgb2gray.bmp"'
+Amd64_DEF+= -D'_PIC1_RESULT_BMP_PATH_THRESHOLD="output/pic1_$(demo_name)_amd64_result.bmp"'
+Amd64_DEF+= -D'_PIC1_RESULT_BMP_PATH_GAUSSIAN_SMOOTH_="output/pic1_$(demo_name)_amd64_gaussianSmooth.bmp"'
+Amd64_DEF+= -D'_PIC1_RESULT_BMP_PATH_MEAN_SMOOTH_="output/pic1_$(demo_name)_amd64_meanSmooth.bmp"'
 #ARM64
 Arm64_DEF:= -D_PLATFORM_ARM64_
 Arm64_DEF+= -D_USE_NEON_ISA_
 Arm64_DEF+= -D_USE_SVE_ISA_
 Arm64_DEF+= -D'_PIC1_BMP_PATH_3072x2048x3_="data/local/tmp/$(BMP_INPUT_NAME)"'
-Arm64_DEF+= -D'_PIC1_RESULT_BMP_PATH_BGR2GRAY="data/local/tmp/pic1_thresholdSeg_arm64_rgb2gray.bmp"'
-Arm64_DEF+= -D'_PIC1_RESULT_BMP_PATH_THRESHOLD="data/local/tmp/pic1_thresholdSeg_arm64_result.bmp"'
+Arm64_DEF+= -D'_PIC1_RESULT_BMP_PATH_BGR2GRAY="data/local/tmp/pic1_$(demo_name)_arm64_rgb2gray.bmp"'
+Arm64_DEF+= -D'_PIC1_RESULT_BMP_PATH_GAUSSIAN_SMOOTH_="data/local/tmp/pic1_$(demo_name)_arm64_gaussianSmooth.bmp"'
+Arm64_DEF+= -D'_PIC1_RESULT_BMP_PATH_MEAN_SMOOTH_="data/local/tmp/pic1_$(demo_name)_arm64_meanSmooth.bmp"'
+Arm64_DEF+= -D'_PIC1_RESULT_BMP_PATH_THRESHOLD="data/local/tmp/pic1_$(demo_name)_arm64_result.bmp"'
 ##########################################     FLAG    ####################################################
 #AMD64
 Amd64_FLAG:= -w -O0
 Amd64_FLAG+= -lm
-Amd64_FLAG+= -fopenmp
+# Amd64_FLAG+= -fopenmp
 Amd64_FLAG+= -mavx
 #ARM64
 Arm64_FLAG:= -O0
 Arm64_FLAG+= -lm
-Arm64_FLAG+= -fopenmp -lomp
+# Arm64_FLAG+= -fopenmp -lomp
 Arm64_FLAG+= -mfloat-abi=softfp -mfpu=neon
 ##########################################     EXE     ####################################################
 out_amd64			:=  exe_amd64
