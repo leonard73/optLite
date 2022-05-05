@@ -29,7 +29,8 @@ int main()
     {
         record_ts_start();
         uint8_t * grayU8 = output;
-        do_gray8_histogram(grayU8,histogram_tbl,img_width*img_height);
+        do_gray8_histogram_optV3_quadCoreParallel(grayU8,histogram_tbl,img_width*img_height);
+        // do_gray8_histogram_optV3(grayU8,histogram_tbl,img_width*img_height);
         record_ts_end();
         printf("do_gray8_histogram runs: %ld US\n",getLatencyUs());
         // log_histogram_u8(histogram_tbl);
@@ -48,7 +49,7 @@ int main()
         record_ts_start();
         uint8_t * grayU8_opIn  = output;
         uint8_t * grayU8_opOut = output+img_width*img_height;
-        do_threshold_u8(grayU8_opIn,grayU8_opOut,img_width*img_height,threshold);
+        do_threshold_u8_optV4(grayU8_opIn,grayU8_opOut,img_width*img_height,threshold);
         record_ts_end();
         printf("do_threshold_u8 runs: %ld US\n",getLatencyUs());
         save_RawGray8_bmpFile((char*)_PIC1_RESULT_BMP_PATH_THRESHOLD,grayU8_opOut,img_width*img_height,img_width,img_height);

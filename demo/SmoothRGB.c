@@ -18,7 +18,7 @@ int main()
     //MEAN SMOOTH  
     {
       record_ts_start();
-      do_smooth_mean_u8_bgr888(input,output,(int32_t)img_width,(int32_t)img_height,2);
+      do_smooth_mean_u8_bgr888(input,output,(int32_t)img_width,(int32_t)img_height,1);
       record_ts_end();
       save_RawRGB_bmpFile((char*)_PIC1_RESULT_BMP_PATH_MEAN_SMOOTH_,output,img_width*img_height*3,img_width,img_height);
       printf("do_smooth_mean_u8_bgr888     runs: %ld US\n",getLatencyUs());

@@ -1,6 +1,6 @@
 ##########################################     PJ      ####################################################
-# demo_name:=ThresholdSeg
-demo_name:=SmoothRGB
+demo_name:=ThresholdSeg
+# demo_name:=SmoothRGB
 ##########################################     CC      ####################################################
 amd64_cc:=gcc
 arm64_android_clang_cc:=$(NDK_ROOT)/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android30-clang
@@ -15,12 +15,13 @@ SourceCode_SRC+=codes/algo_COpt/*.c
 SourceCode_SRC+=$(Demo_SRC)
 ##########################################     DEF     ####################################################
 #TEST BMP INPUT
-BMP_INPUT_NAME?=pic1.bmp
+BMP_INPUT_NAME?=pic2.bmp
 #AMD64
 Amd64_DEF:= -D_PLATFORM_AMD64_
 Amd64_DEF+= -D_USE_AVX128_ISA_ -mavx
 Amd64_DEF+= -D_USE_AVX256_ISA_ -mavx2
 Amd64_DEF+= -D_USE_AVX512_ISA_
+Amd64_DEF+= -D_OPENMP_ENABLE_ -D'_OPENMP_MAX_THREAD_=4' -fopenmp
 Amd64_DEF+= -D'_PIC1_BMP_PATH_3072x2048x3_="data/$(BMP_INPUT_NAME)"'
 Amd64_DEF+= -D'_PIC1_RESULT_BMP_PATH_BGR2GRAY="output/pic1_$(demo_name)_amd64_rgb2gray.bmp"'
 Amd64_DEF+= -D'_PIC1_RESULT_BMP_PATH_THRESHOLD="output/pic1_$(demo_name)_amd64_result.bmp"'
@@ -30,6 +31,7 @@ Amd64_DEF+= -D'_PIC1_RESULT_BMP_PATH_MEAN_SMOOTH_="output/pic1_$(demo_name)_amd6
 Arm64_DEF:= -D_PLATFORM_ARM64_
 Arm64_DEF+= -D_USE_NEON_ISA_
 Arm64_DEF+= -D_USE_SVE_ISA_
+Arm64_DEF+= -D_OPENMP_ENABLE_ -D'_OPENMP_MAX_THREAD_=4' -fopenmp -lomp
 Arm64_DEF+= -D'_PIC1_BMP_PATH_3072x2048x3_="data/local/tmp/$(BMP_INPUT_NAME)"'
 Arm64_DEF+= -D'_PIC1_RESULT_BMP_PATH_BGR2GRAY="data/local/tmp/pic1_$(demo_name)_arm64_rgb2gray.bmp"'
 Arm64_DEF+= -D'_PIC1_RESULT_BMP_PATH_GAUSSIAN_SMOOTH_="data/local/tmp/pic1_$(demo_name)_arm64_gaussianSmooth.bmp"'

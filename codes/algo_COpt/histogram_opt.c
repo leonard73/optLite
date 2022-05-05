@@ -37,14 +37,50 @@ void do_gray8_histogram_optV3(uint8_t * src,uint8_t * histogramTbl,uint32_t pixe
     register uint8_t *src2 = src1+quad_pixelNB;
     register uint8_t *src3 = src2+quad_pixelNB;
     register uint8_t *src4 = src3+quad_pixelNB;
-    do
+    #define DO_QUAD_HIST_LOOP(HIST_ARRAY,SOURCE_PTR,N) for(int32_t K=0;K<N;K++){DO_QUAD_HIST(HIST_ARRAY,SOURCE_PTR)}
+    #define DO_QUAD_HIST(HIST_ARRAY,SOURCE_PTR) for(int32_t j=0;j<(int32_t)quad_pixelNB;j++){HIST_ARRAY[SOURCE_PTR[j]]++;}
+    for(int i=0;i<4;i++)
     {
-        hist1[*src1++]++;
-        hist2[*src2++]++;
-        hist3[*src3++]++;
-        hist4[*src4++]++;
-        quad_pixelNB--;
-    } while (quad_pixelNB);
+        switch(i)
+        {
+            case  0:DO_QUAD_HIST_LOOP(hist1,src1,100);break;
+            case  1:DO_QUAD_HIST_LOOP(hist2,src2,100);break;
+            case  2:DO_QUAD_HIST_LOOP(hist3,src3,100);break;
+            case  3:DO_QUAD_HIST_LOOP(hist4,src4,100);break;
+            default:break;
+        }
+    }
+    for(uint32_t i=0;i<256;i++)
+    {
+        *histogramTbl++ = hist1[i] + hist2[i] + hist3[i] + hist4[i];
+    }
+    free(hist1);free(hist2);free(hist3);free(hist4);
+}
+void do_gray8_histogram_optV3_quadCoreParallel(uint8_t * src,uint8_t * histogramTbl,uint32_t pixelNB)
+{
+    uint8_t * hist1 = (uint8_t*)calloc(256,sizeof(uint8_t));
+    uint8_t * hist2 = (uint8_t*)calloc(256,sizeof(uint8_t));
+    uint8_t * hist3 = (uint8_t*)calloc(256,sizeof(uint8_t));
+    uint8_t * hist4 = (uint8_t*)calloc(256,sizeof(uint8_t));
+    uint32_t  quad_pixelNB = pixelNB>>2;
+    register uint8_t *src1 = src;
+    register uint8_t *src2 = src1+quad_pixelNB;
+    register uint8_t *src3 = src2+quad_pixelNB;
+    register uint8_t *src4 = src3+quad_pixelNB;
+    #define DO_QUAD_HIST_LOOP(HIST_ARRAY,SOURCE_PTR,N) for(int32_t K=0;K<N;K++){DO_QUAD_HIST(HIST_ARRAY,SOURCE_PTR)}
+    #define DO_QUAD_HIST(HIST_ARRAY,SOURCE_PTR) for(int32_t j=0;j<(int32_t)quad_pixelNB;j++){HIST_ARRAY[SOURCE_PTR[j]]++;}
+    #pragma omp parallel for num_threads(4) shared(hist1) shared(hist2) shared(hist3) shared(hist4)
+    for(int i=0;i<4;i++)
+    {
+        switch(i)
+        {
+            case  0:DO_QUAD_HIST_LOOP(hist1,src1,100);break;
+            case  1:DO_QUAD_HIST_LOOP(hist2,src2,100);break;
+            case  2:DO_QUAD_HIST_LOOP(hist3,src3,100);break;
+            case  3:DO_QUAD_HIST_LOOP(hist4,src4,100);break;
+            default:break;
+        }
+    }
     for(uint32_t i=0;i<256;i++)
     {
         *histogramTbl++ = hist1[i] + hist2[i] + hist3[i] + hist4[i];
